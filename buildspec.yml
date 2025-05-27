@@ -1,0 +1,11 @@
+version: 0.2
+
+phases:
+  build:
+    commands:
+      - docker build -t $REPOSITORY_URI:$CODEBUILD_RESOLVED_SOURCE_VERSION .
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $(echo $REPOSITORY_URI | cut -d "/" -f 1)
+      - docker push $REPOSITORY_URI:$CODEBUILD_RESOLVED_SOURCE_VERSION
+      - printf '[{"name":"todo-list-app","imageUri":"%s"}]' $REPOSITORY_URI:$CODEBUILD_RESOLVED_SOURCE_VERSION > taskdef.json
+artifacts:
+  files: taskdef.json
